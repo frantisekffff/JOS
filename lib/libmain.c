@@ -1,0 +1,32 @@
+// Called from entry.S to get us going.
+// entry.S already took care of defining envs, pages, uvpd, and uvpt.
+
+#include <inc/lib.h>
+
+extern void umain(int argc, char **argv);
+
+const volatile struct Env *thisenv;
+const char *binaryname = "<unknown>";
+
+void
+libmain(int argc, char **argv)
+{
+	// set thisenv to point at our Env structure in envs[].
+	// LAB 3: Your code here.
+	// Zavolam si pomocou makra sys_getenvid() id aktualneho prostredia
+	envid_t id = sys_getenvid();	
+
+	// Ulozim si aktualne prostredie do thisenv, spodnych 10 bitov adresy prostredia envid_t ukazuju na konretny env do envs[], pouzite makro ENVX(id)
+	thisenv = &envs[ENVX(id)];
+
+	// save the name of the program so that panic() can use it
+	if (argc > 0)
+		binaryname = argv[0];
+
+	// call user main routine
+	umain(argc, argv);
+
+	// exit gracefully
+	exit();
+}
+
